@@ -12,7 +12,11 @@ class City extends Model
     protected $fillable = ['name'];
 
     public function locaions(){
-        return $this -> hasMany(Location::class);
+        return $this -> hasMany(Location::class,'city_id');
+    }
+
+    public function users(){
+        return $this->hasMany(User::class, 'city_id');
     }
 
 }

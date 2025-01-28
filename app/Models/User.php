@@ -22,6 +22,9 @@ class User extends Authenticatable
     public function tours(){
         return $this -> hasMany(Tour::class, 'user_id');
     }
+    public function city(){
+        return $this->belongsTo(City::class);
+    }
 
     protected $hidden = [
         'password',
