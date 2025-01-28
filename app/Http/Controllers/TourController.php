@@ -6,59 +6,78 @@ use Illuminate\Http\Request;
 
 class TourController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    // 1. Получение всех туров
     public function index()
     {
-        //
+        $tours = Tour::with(['guide', 'location'])->get();
+        return response()->json($tours);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // 2. Создание нового тура
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'guide_id' => 'required|exists:users,id',
+            'location_id' => 'required|exists:locations,id',
+            'price' => 'required|numeric|min:0',
+            'volume' => 'required|integer|min:1',
+            'date' => 'required|date',
+        ]);
+
+        $tour = Tour::create($validatedData);
+        return response()->json(['message' => 'Tour created successfully!', 'tour' => $tour]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // 3. Получение информации о конкретном туре
+    public function show($id)
     {
-        //
+        $tour = Tour::with(['guide', 'location'])->findOrFail($id);
+        return response()->json($tour);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    // 4. Обновление тура
+    public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'string|max:255',
+            'description' => 'string',
+            'guide_id' => 'exists:users,id',
+            'location_id' => 'exists:locations,id',
+            'price' => 'numeric|min:0',
+            'volume' => 'integer|min:1',
+            'date' => 'date',
+        ]);
+
+        $tour = Tour::findOrFail($id);
+        $tour->update($validatedData);
+        return response()->json(['message' => 'Tour updated successfully!', 'tour' => $tour]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // 5. Удаление тура
+    public function destroy($id)
     {
-        //
+        $tour = Tour::findOrFail($id);
+        $tour->delete();
+        return response()->json(['message' => 'Tour deleted successfully!']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // 6. Покупка тура (уменьшение volume)
+    public function purchase(Request $request, $id)
     {
-        //
+        $request->validate([
+            'seats' => 'required|integer|min:1',
+        ]);
+
+        $tour = Tour::findOrFail($id);
+
+        try {
+            $tour->decreaseVolume($request->seats);
+            return response()->json(['message' => 'Tour purchased successfully!', 'remaining_volume' => $tour->volume]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
     }
 }

@@ -24,7 +24,10 @@ class CityController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:cities,name|max:255',
+            'name' => 'required|string|max:255',
+            'img' => 'required|string',
+            'description' => 'required|string',
+            'city_code' => 'required|max:3'
         ]);
 
         $city = City::create($validated);
@@ -57,7 +60,10 @@ class CityController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|unique:cities,name|max:255',
+            'name' => 'required|string|max:255',
+            'img' => 'required|string',
+            'description' => 'required|string',
+            'city_code' => 'required|max:4'
         ]);
 
         $city->update($validated);

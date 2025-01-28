@@ -26,4 +26,14 @@ class Tour extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    public function decreaseVolume(int $purchasedSeats)
+    {
+        if ($this->volume < $purchasedSeats) {
+            throw new \Exception('Not enough seats available for this tour.');
+        }
+
+        $this->volume -= $purchasedSeats;
+        $this->save();
+    }
 }

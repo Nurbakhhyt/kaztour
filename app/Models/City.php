@@ -9,9 +9,9 @@ class City extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name','img','description','city_code'];
 
-    public function locaions(){
+    public function locations(){
         return $this -> hasMany(Location::class,'city_id');
     }
 
