@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
 Route::get('/tours', [TourController::class, 'index']);
 Route::post('/tours', [TourController::class, 'store']);
 Route::get('/tours/{id}', [TourController::class, 'show']);
