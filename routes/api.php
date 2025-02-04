@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\TourController;
+use \App\Http\Controllers\TourController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CityController;

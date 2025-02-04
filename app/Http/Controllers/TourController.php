@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Tour;
 class TourController extends Controller
 {
 
     // 1. Получение всех туров
     public function index()
     {
-        $tours = Tour::with(['guide', 'location'])->get();
+        $tours = Tour::with(['user', 'location'])->get();
         return response()->json($tours);
     }
 
@@ -34,7 +34,7 @@ class TourController extends Controller
     // 3. Получение информации о конкретном туре
     public function show($id)
     {
-        $tour = Tour::with(['guide', 'location'])->findOrFail($id);
+        $tour = Tour::with(['user', 'location'])->findOrFail($id);
         return response()->json($tour);
     }
 
