@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Fortify;
 /*
@@ -21,3 +22,5 @@ Route::get('/', function () {
 Route::middleware(['auth'])->get('/home', function(){
    return view('home');
 })->name('home');
+
+Route::get('/admin/users', [AdminController::class,'showUsers'])->name('admin.users');
