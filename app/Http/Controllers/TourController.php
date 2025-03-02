@@ -20,11 +20,12 @@ class TourController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'guide_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id',
             'location_id' => 'required|exists:locations,id',
             'price' => 'required|numeric|min:0',
             'volume' => 'required|integer|min:1',
             'date' => 'required|date',
+            'image'=>'required|string'
         ]);
 
         $tour = Tour::create($validatedData);
@@ -49,6 +50,7 @@ class TourController extends Controller
             'price' => 'numeric|min:0',
             'volume' => 'integer|min:1',
             'date' => 'date',
+            'image'=>'string'
         ]);
 
         $tour = Tour::findOrFail($id);

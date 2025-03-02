@@ -16,7 +16,8 @@ class Tour extends Model
         'location_id',
         'price',
         'volume',
-        'date'
+        'date',
+        'image'
     ];
 
     public function location(){
