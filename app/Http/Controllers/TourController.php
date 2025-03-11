@@ -17,19 +17,28 @@ class TourController extends Controller
     // 2. Создание нового тура
     public function store(Request $request)
     {
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'location_id' => 'required|exists:locations,id',
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'volume' => 'required|integer|min:1',
             'date' => 'required|date',
-            'image'=>'required|string'
+            'user_id' => 'nullable|exists:users,id',
+            'location_id' => 'nullable|exists:locations,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
-        $tour = Tour::create($validatedData);
-        return response()->json(['message' => 'Tour created successfully!', 'tour' => $tour]);
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('tours', 'public');
+            $validatedData['image'] = $imagePath;
+        }
+
+        Tour::create($validatedData);
+
+
+        return response()->json(['message' => 'Tour created successfully'], 201);
     }
 
     // 3. Получение информации о конкретном туре
@@ -43,18 +52,26 @@ class TourController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'name' => 'string|max:255',
-            'description' => 'string',
-            'guide_id' => 'exists:users,id',
-            'location_id' => 'exists:locations,id',
-            'price' => 'numeric|min:0',
-            'volume' => 'integer|min:1',
-            'date' => 'date',
-            'image'=>'string'
+            'name' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'guide_id' => 'sometimes|exists:users,id',
+            'location_id' => 'sometimes|exists:locations,id',
+            'price' => 'sometimes|numeric|min:0',
+            'volume' => 'sometimes|integer|min:1',
+            'date' => 'sometimes|date',
+            'image' => 'sometimes|file|mimes:jpeg,png,jpg|max:2048'
         ]);
 
         $tour = Tour::findOrFail($id);
+
+        // Егер жаңа сурет жүктелсе, оны сақтау
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('uploads', 'public');
+            $validatedData['image'] = $imagePath;
+        }
+
         $tour->update($validatedData);
+
         return response()->json(['message' => 'Tour updated successfully!', 'tour' => $tour]);
     }
 
