@@ -31,6 +31,9 @@ RUN php artisan key:generate || true
 RUN php artisan migrate --force || true
 RUN php artisan config:cache || true
 
+# Storage және bootstrap/cache папкаларына рұқсат беру
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 # Apache үшін порт ашу
 EXPOSE 80
 
