@@ -9,22 +9,24 @@ RUN apt-get update && apt-get install -y \
 # Composer орнату
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Жоба директориясын дайындау
+# Laravel үшін жұмыс директориясын орнату
 WORKDIR /var/www/html
 
 # Laravel файлын контейнерге көшіру
-COPY .. .
+COPY . .
+
+# ✅ **Apache конфигурациясын дұрыс орнату**
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
+RUN a2enmod rewrite
 
 # Laravel үшін дұрыс рұқсаттар орнату
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Composer тәуелділіктерін орнату (ҚАТЕНІ ТҮЗЕТУ)
+# ✅ **Composer тәуелділіктерін орнату**
 RUN composer install --no-dev --optimize-autoloader || true
 
-# .env файлын көшіру (егер бар болса)
-COPY ../.env.example .env
-
-# Artisan командаларын орындау (МӘСЕЛЕНІ ТҮЗЕТУ)
+# ✅ **Laravel конфигурациясы**
+COPY .env.example .env
 RUN php artisan key:generate || true
 RUN php artisan migrate --force || true
 RUN php artisan config:cache || true
