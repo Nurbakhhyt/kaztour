@@ -13,7 +13,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 WORKDIR /var/www/html
 
 # Laravel файлын контейнерге көшіру
-COPY . .
+COPY .. .
 
 # Laravel үшін дұрыс рұқсаттар орнату
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -22,7 +22,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 RUN composer install --no-dev --optimize-autoloader || true
 
 # .env файлын көшіру (егер бар болса)
-COPY .env.example .env
+COPY ../.env.example .env
 
 # Artisan командаларын орындау (МӘСЕЛЕНІ ТҮЗЕТУ)
 RUN php artisan key:generate || true
