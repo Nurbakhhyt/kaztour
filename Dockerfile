@@ -34,6 +34,8 @@ RUN php artisan config:cache || true
 # Storage және bootstrap/cache папкаларына рұқсат беру
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN docker-php-ext-install pdo pdo_pgsql
+
 # Apache үшін порт ашу
 EXPOSE 80
 
