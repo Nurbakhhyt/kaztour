@@ -1,8 +1,20 @@
-// Fonts
-@import url('https://fonts.bunny.net/css?family=Nunito');
+// resources/sass/app.scss
 
-// Variables
-@import 'variables';
+// Ескі код:
+// @import "~bootstrap/scss/functions";
+// @import "~bootstrap/scss/variables";
+// @import "~bootstrap/scss/mixins";
+// @import "~bootstrap/scss/utilities";
 
-// Bootstrap
-@import 'bootstrap/scss/bootstrap';
+// Жаңа код:
+@use "~bootstrap/scss/functions" as *;
+@use "~bootstrap/scss/variables" as *;
+@use "~bootstrap/scss/mixins" as *;
+@use "~bootstrap/scss/utilities" as *;
+
+// Қалған Bootstrap компоненттерін импорттау
+@use "~bootstrap/scss/root";
+@use "~bootstrap/scss/reboot";
+@use "~bootstrap/scss/type";
+@use "~bootstrap/scss/grid";
+// ... басқа қажетті компоненттер
