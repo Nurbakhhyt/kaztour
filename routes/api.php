@@ -31,3 +31,4 @@ Route::delete('/tours/{id}', [TourController::class, 'destroy']);
 Route::post('/tours/{id}/purchase', [TourController::class, 'purchase']);
 Route::apiResource('cities', CityController::class);
 Route::apiResource('locations', LocationController::class);
+

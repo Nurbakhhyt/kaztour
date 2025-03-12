@@ -17,28 +17,19 @@ class TourController extends Controller
     // 2. Создание нового тура
     public function store(Request $request)
     {
-
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+            'location_id' => 'required|exists:locations,id',
             'price' => 'required|numeric|min:0',
             'volume' => 'required|integer|min:1',
             'date' => 'required|date',
-            'user_id' => 'nullable|exists:users,id',
-            'location_id' => 'nullable|exists:locations,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image'=>'required|string'
         ]);
 
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('tours', 'public');
-            $validatedData['image'] = $imagePath;
-        }
-
-        Tour::create($validatedData);
-
-
-        return response()->json(['message' => 'Tour created successfully'], 201);
+        $tour = Tour::create($validatedData);
+        return response()->json(['message' => 'Tour created successfully!', 'tour' => $tour]);
     }
 
     // 3. Получение информации о конкретном туре
@@ -49,29 +40,32 @@ class TourController extends Controller
     }
 
     // 4. Обновление тура
-    public function update(Request $request, $id)
+    public function update(Request $request, Tour $tour)
     {
-        $validatedData = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'guide_id' => 'sometimes|exists:users,id',
-            'location_id' => 'sometimes|exists:locations,id',
-            'price' => 'sometimes|numeric|min:0',
-            'volume' => 'sometimes|integer|min:1',
-            'date' => 'sometimes|date',
-            'image' => 'sometimes|file|mimes:jpeg,png,jpg|max:2048'
+        $tour::updated([
+            'title'=>$request->title,
+            'description'=>$request->description,
+            'user_id'=>$request->user_id,
+            'location_id'=>$request->location_id,
+            'price'=>$request->price,
+            'volume'=>$request->price,
+            'date'=>$request->date,
+            'image'=>$request->date
         ]);
 
-        $tour = Tour::findOrFail($id);
+//        $validatedData = $request->validate([
+//            'name' => 'string|max:255',
+//            'description' => 'string',
+//            'guide_id' => 'exists:users,id',
+//            'location_id' => 'exists:locations,id',
+//            'price' => 'numeric|min:0',
+//            'volume' => 'integer|min:1',
+//            'date' => 'date',
+//            'image'=>'string'
+//        ]);
 
-        // Егер жаңа сурет жүктелсе, оны сақтау
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('uploads', 'public');
-            $validatedData['image'] = $imagePath;
-        }
-
-        $tour->update($validatedData);
-
+//        $tour = Tour::findOrFail($id);
+//        $tour->update($validatedData);
         return response()->json(['message' => 'Tour updated successfully!', 'tour' => $tour]);
     }
 
