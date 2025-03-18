@@ -29,6 +29,6 @@ Route::get('/tours/{id}', [TourController::class, 'show']);
 Route::put('/tours/{id}', [TourController::class, 'update']);
 Route::delete('/tours/{id}', [TourController::class, 'destroy']);
 Route::post('/tours/{id}/purchase', [TourController::class, 'purchase']);
-Route::apiResource('cities', CityController::class);
-Route::apiResource('locations', LocationController::class);
+//Route::apiResource('cities', CityController::class);
+//Route::apiResource('locations', LocationController::class);
 

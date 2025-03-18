@@ -13,7 +13,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-
+                        <a href="{{ route('tours.index') }}" class="hover:underline">Туры</a>
                     {{ __('You are logged in!') }}
                 </div>
             </div>

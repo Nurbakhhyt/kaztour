@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Location;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Tour;
 class TourController extends Controller
@@ -10,8 +12,10 @@ class TourController extends Controller
     // 1. Получение всех туров
     public function index()
     {
-        $tours = Tour::with(['user', 'location'])->get();
-        return response()->json($tours);
+//        $tours = Tour::with(['user', 'location'])->get();
+//        return response()->json($tours);
+        $tours = Tour::with('location', 'user')->latest()->get();
+        return view('tours.index', compact('tours'));
     }
 
     // 2. Создание нового тура
@@ -39,19 +43,44 @@ class TourController extends Controller
         return response()->json($tour);
     }
 
+    public function edit(Tour $tour){
+        $users = User::all();
+        $locations = Location::all();
+
+        return view('tours.edit', compact('tour', 'users', 'locations'));
+    }
+
     // 4. Обновление тура
     public function update(Request $request, Tour $tour)
     {
-        $tour::updated([
-            'title'=>$request->title,
-            'description'=>$request->description,
-            'user_id'=>$request->user_id,
-            'location_id'=>$request->location_id,
-            'price'=>$request->price,
-            'volume'=>$request->price,
-            'date'=>$request->date,
-            'image'=>$request->date
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'user_id' => 'required|exists:users,id',
+            'location_id' => 'required|exists:locations,id',
+            'price' => 'required|numeric|min:0',
+            'volume' => 'required|integer|min:0',
+            'date' => 'required|date',
+            'image' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('tours', 'public');
+        }
+
+        $tour->update($validated);
+
+        return redirect()->route('tours.index')->with('success', 'Тур успешно обновлён');
+//        $tour::updated([
+//            'title'=>$request->title,
+//            'description'=>$request->description,
+//            'user_id'=>$request->user_id,
+//            'location_id'=>$request->location_id,
+//            'price'=>$request->price,
+//            'volume'=>$request->price,
+//            'date'=>$request->date,
+//            'image'=>$request->date
+//        ]);
 
 //        $validatedData = $request->validate([
 //            'name' => 'string|max:255',
@@ -63,10 +92,10 @@ class TourController extends Controller
 //            'date' => 'date',
 //            'image'=>'string'
 //        ]);
-
+//
 //        $tour = Tour::findOrFail($id);
 //        $tour->update($validatedData);
-        return response()->json(['message' => 'Tour updated successfully!', 'tour' => $tour]);
+//        return response()->json(['message' => 'Tour updated successfully!', 'tour' => $tour]);
     }
 
     // 5. Удаление тура
