@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use App\Models\Location;
+use App\Models\TourImage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Tour;
@@ -10,12 +12,110 @@ class TourController extends Controller
 {
 
     // 1. Получение всех туров
-    public function index()
+    public function index(Request $request)
     {
-//        $tours = Tour::with(['user', 'location'])->get();
-//        return response()->json($tours);
-        $tours = Tour::with('location', 'user')->latest()->get();
-        return view('tours.index', compact('tours'));
+
+        $query = Tour::query();
+
+        $query->where('name', 'like', '%' . $request->name . '%');
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->date_to);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
+        }
+
+        if ($request->filled('volume_max')) {
+            $query->where('volume', '<=', $request->volume_max);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+
+        // ✅ Отфильтрованные туры
+        $tours = $query->with(['user', 'location'])->paginate(10);
+
+        // ✅ Справочные данные для фильтрации
+        $users = User::all();
+        $locations = Location::all();
+
+        return view('tours.index', compact('tours', 'users', 'locations'));
+
+//        return response()->json([
+//            'success' => true,
+//            'data' => $tours,
+//        ], 200);
+
+
+//        $query = Tour::query();
+//
+//        if ($request->filled('name')) {
+//            $query->where('name', 'like', '%' . $request->name . '%');
+//        }
+//
+//        if ($request->filled('description')) {
+//            $query->where('description', 'like', '%' . $request->description . '%');
+//        }
+//
+//        if ($request->filled('date_from')) {
+//            $query->whereDate('date', '>=', $request->date_from);
+//        }
+//
+//        if ($request->filled('date_to')) {
+//            $query->whereDate('date', '<=', $request->date_to);
+//        }
+//
+//        if ($request->filled('price_min')) {
+//            $query->where('price', '>=', $request->price_min);
+//        }
+//
+//        if ($request->filled('price_max')) {
+//            $query->where('price', '<=', $request->price_max);
+//        }
+//
+//        if ($request->filled('volume_min')) {
+//            $query->where('volume', '>=', $request->volume_min);
+//        }
+//
+//        if ($request->filled('volume_max')) {
+//            $query->where('volume', '<=', $request->volume_max);
+//        }
+//
+//        if ($request->filled('user_id')) {
+//            $query->where('user_id', $request->user_id);
+//        }
+//
+//        if ($request->filled('location_id')) {
+//            $query->where('location_id', $request->location_id);
+//        }
+//
+//        $tours = $query->with(['user', 'location'])->paginate(10);
+//
+//        $tours = Tour::with('location', 'user')->latest()->get();
+//        $users = User::all();
+//        $locations = Location::all();
+//
+//        return view('tours.index', compact('tours', 'users', 'locations'));
+    }
+
+    public function create()
+    {
+        $users = User::all();
+        $locations = Location::all();
+
+//        return response()->json([
+//            'success' => true,
+//            'users' => $users,
+//            'locations' => $locations,
+//        ], 200);
+      return view('tours.create', compact('users', 'locations'));
     }
 
     // 2. Создание нового тура
@@ -23,29 +123,131 @@ class TourController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
             'location_id' => 'required|exists:locations,id',
             'price' => 'required|numeric|min:0',
             'volume' => 'required|integer|min:1',
             'date' => 'required|date',
-            'image'=>'required|string'
+            'images.*' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:2048', // ✅ Множественные файлы
         ]);
 
+        // Создаём тур
         $tour = Tour::create($validatedData);
-        return response()->json(['message' => 'Tour created successfully!', 'tour' => $tour]);
+
+        // Загружаем изображения, если они есть
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath = $image->store('tours', 'public');
+                TourImage::create([
+                    'tour_id' => $tour->id,
+                    'image_path' => $imagePath
+                ]);
+            }
+        }
+
+        // Возвращаем JSON, если это API-запрос
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Тур успешно сохранён!',
+                'tour' => $tour->load('images'),
+            ], 201);
+        }
+
+        return redirect()->route('tours.index')->with('success', 'Тур успешно сохранён!');
+//        $validatedData = $request->validate([
+//            'name' => 'required|string|max:255',
+//            'description' => 'nullable|string',
+//            'user_id' => 'required|exists:users,id',
+//            'location_id' => 'required|exists:locations,id',
+//            'price' => 'required|numeric|min:0',
+//            'volume' => 'required|integer|min:1',
+//            'date' => 'required|date',
+//            'image' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+//        ]);
+//
+//        // Загрузка изображения
+//        if ($request->hasFile('image')) {
+//            $imagePath = $request->file('image')->store('tours', 'public');
+//            $validatedData['image'] = $imagePath;
+//        }
+//
+//        $tour = Tour::create($validatedData);
+//
+//        if ($request->wantsJson()) {
+//            return response()->json([
+//                'success' => true,
+//                'message' => 'Тур успешно сохранён!',
+//                'tour' => $tour,
+//            ], 201);
+//        }
+//
+//        return redirect()->route('tours.index')->with('success', 'Тур успешно сохранён!');
+
     }
 
-    // 3. Получение информации о конкретном туре
-    public function show($id)
+
+//     3. Получение информации о конкретном туре
+    public function show(Tour $tour)
     {
-        $tour = Tour::with(['user', 'location'])->findOrFail($id);
-        return response()->json($tour);
+        $users = User::all();
+        $locations = Location::all();
+
+        $booking = null;
+        if (auth()->check()) {
+            $booking = \App\Models\Booking::where('tour_id', $tour->id)
+                ->where('user_id', auth()->id())
+                ->first();
+        }
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'tour' => $tour,
+                'users' => $users,
+                'locations' => $locations,
+                'booking' => $booking,
+            ]);
+        }
+
+        return view('tours.show', compact('tour', 'users', 'locations', 'booking'));
+
+
     }
+
+//    public function show(Tour $tour)
+//    {
+//        $booking = auth()->check()
+//            ? \App\Models\Booking::where('tour_id', $tour->id)
+//                ->where('user_id', auth()->id())
+//                ->first()
+//            : null;
+//
+//        return response()->json([
+//            'success' => true,
+//            'tour' => $tour->load(['user', 'location']), // Қатысты мәліметтерді қосу
+//            'booking' => $booking,
+//            'users' => User::all(),
+//            'locations' => Location::all()
+//        ]);
+//    }
+
+
+
+
 
     public function edit(Tour $tour){
         $users = User::all();
         $locations = Location::all();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'tour' => $tour,
+                'users' => $users,
+                'locations' => $locations,
+            ]);
+        }
 
         return view('tours.edit', compact('tour', 'users', 'locations'));
     }
@@ -61,49 +263,47 @@ class TourController extends Controller
             'price' => 'required|numeric|min:0',
             'volume' => 'required|integer|min:0',
             'date' => 'required|date',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048', // уточнение форматов
         ]);
 
+        // Если новое изображение загружено — сохранить и обновить
         if ($request->hasFile('image')) {
+            // Удалить старое изображение, если оно есть
+            if ($tour->image && \Storage::disk('public')->exists($tour->image)) {
+                \Storage::disk('public')->delete($tour->image);
+            }
+
             $validated['image'] = $request->file('image')->store('tours', 'public');
         }
 
         $tour->update($validated);
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Тур успешно обновлён',
+            ]);
+        }
 
         return redirect()->route('tours.index')->with('success', 'Тур успешно обновлён');
-//        $tour::updated([
-//            'title'=>$request->title,
-//            'description'=>$request->description,
-//            'user_id'=>$request->user_id,
-//            'location_id'=>$request->location_id,
-//            'price'=>$request->price,
-//            'volume'=>$request->price,
-//            'date'=>$request->date,
-//            'image'=>$request->date
-//        ]);
-
-//        $validatedData = $request->validate([
-//            'name' => 'string|max:255',
-//            'description' => 'string',
-//            'guide_id' => 'exists:users,id',
-//            'location_id' => 'exists:locations,id',
-//            'price' => 'numeric|min:0',
-//            'volume' => 'integer|min:1',
-//            'date' => 'date',
-//            'image'=>'string'
-//        ]);
-//
-//        $tour = Tour::findOrFail($id);
-//        $tour->update($validatedData);
-//        return response()->json(['message' => 'Tour updated successfully!', 'tour' => $tour]);
     }
+
 
     // 5. Удаление тура
     public function destroy($id)
     {
         $tour = Tour::findOrFail($id);
         $tour->delete();
-        return response()->json(['message' => 'Tour deleted successfully!']);
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Тур успешно сохранён!',
+            ]);
+        }
+
+        return redirect()->route('tours.index')->with('success', 'Тур успешно сохранён!');
+
+//        return redirect()->route('tours.index')->with('success', 'Тур успешно сохранён!');
+//        return response()->json(['message' => 'Tour deleted successfully!']);
     }
 
     // 6. Покупка тура (уменьшение volume)

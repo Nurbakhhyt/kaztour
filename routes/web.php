@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\BookingController;
 use \App\Http\Controllers\TourController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,10 +28,15 @@ Route::middleware(['auth'])->get('/home', function(){
    return view('home');
 })->name('home');
 
-Route::get('/admin/users', [AdminController::class,'showUsers'])->name('admin.users');
+//Route::get('/admin/users', [AdminController::class,'showUsers'])->name('admin.users');
 Route::resource('cities', CityController::class);
 Route::resource('locations', LocationController::class);
 Route::resource('tours',TourController::class);
+
+Route::middleware('auth')->group(function () {
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+});
 
 //Route::get('/tours', [TourController::class, 'index'])->name('tours.index');
 //Route::post('/tours', [TourController::class, 'store'])->name('tours.store');
@@ -38,4 +44,4 @@ Route::resource('tours',TourController::class);
 //Route::get('/tours/{id}', [TourController::class, 'edit'])->name('tours.edit');
 //Route::put('/tours/{id}', [TourController::class, 'update'])->name('tours.update');
 //Route::delete('/tours/{id}', [TourController::class, 'destroy'])->name('tours.destroy');
-Route::post('/tours/{id}/purchase', [TourController::class, 'purchase'])->name('tours.purchase');
+//Route::post('/tours/{id}/purchase', [TourController::class, 'purchase'])->name('tours.purchase');

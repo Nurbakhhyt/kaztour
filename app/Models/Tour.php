@@ -28,6 +28,16 @@ class Tour extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(TourImage::class);
+    }
+
     public function decreaseVolume(int $purchasedSeats)
     {
         if ($this->volume < $purchasedSeats) {
