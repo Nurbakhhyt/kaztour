@@ -23,7 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canAccessFilament(): bool
     {
-        return str_ends_with($this->email, '@aventra.kzz'); // или любая логика
+        return in_array($this->role, ['admin', 'moderator', 'guide']);
     }
 
     public function tours(){
@@ -41,6 +41,27 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isModerator(): bool
+    {
+        return $this->role === 'moderator';
+    }
+
+    public function isGuide(): bool
+    {
+        return $this->role === 'guide';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
 
     /**
      * The attributes that should be cast.
