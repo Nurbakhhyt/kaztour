@@ -46,63 +46,15 @@ class TourController extends Controller
         $users = User::all();
         $locations = Location::all();
 
-        return view('tours.index', compact('tours', 'users', 'locations'));
-
-//        return response()->json([
-//            'success' => true,
-//            'data' => $tours,
-//        ], 200);
-
-
-//        $query = Tour::query();
-//
-//        if ($request->filled('name')) {
-//            $query->where('name', 'like', '%' . $request->name . '%');
-//        }
-//
-//        if ($request->filled('description')) {
-//            $query->where('description', 'like', '%' . $request->description . '%');
-//        }
-//
-//        if ($request->filled('date_from')) {
-//            $query->whereDate('date', '>=', $request->date_from);
-//        }
-//
-//        if ($request->filled('date_to')) {
-//            $query->whereDate('date', '<=', $request->date_to);
-//        }
-//
-//        if ($request->filled('price_min')) {
-//            $query->where('price', '>=', $request->price_min);
-//        }
-//
-//        if ($request->filled('price_max')) {
-//            $query->where('price', '<=', $request->price_max);
-//        }
-//
-//        if ($request->filled('volume_min')) {
-//            $query->where('volume', '>=', $request->volume_min);
-//        }
-//
-//        if ($request->filled('volume_max')) {
-//            $query->where('volume', '<=', $request->volume_max);
-//        }
-//
-//        if ($request->filled('user_id')) {
-//            $query->where('user_id', $request->user_id);
-//        }
-//
-//        if ($request->filled('location_id')) {
-//            $query->where('location_id', $request->location_id);
-//        }
-//
-//        $tours = $query->with(['user', 'location'])->paginate(10);
-//
-//        $tours = Tour::with('location', 'user')->latest()->get();
-//        $users = User::all();
-//        $locations = Location::all();
-//
 //        return view('tours.index', compact('tours', 'users', 'locations'));
+
+        return response()->json([
+            'success' => true,
+            'data' => $tours,
+        ], 200);
+
+
+
     }
 
     public function create()
@@ -110,12 +62,12 @@ class TourController extends Controller
         $users = User::all();
         $locations = Location::all();
 
-//        return response()->json([
-//            'success' => true,
-//            'users' => $users,
-//            'locations' => $locations,
-//        ], 200);
-      return view('tours.create', compact('users', 'locations'));
+        return response()->json([
+            'success' => true,
+            'users' => $users,
+            'locations' => $locations,
+        ], 200);
+//      return view('tours.create', compact('users', 'locations'));
     }
 
     // 2. Создание нового тура
@@ -302,8 +254,6 @@ class TourController extends Controller
 
         return redirect()->route('tours.index')->with('success', 'Тур успешно сохранён!');
 
-//        return redirect()->route('tours.index')->with('success', 'Тур успешно сохранён!');
-//        return response()->json(['message' => 'Tour deleted successfully!']);
     }
 
     // 6. Покупка тура (уменьшение volume)

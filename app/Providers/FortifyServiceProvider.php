@@ -34,6 +34,8 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
+
+
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
@@ -45,11 +47,21 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::loginView(function () {
-            return view('auth.login');
+//            return view('auth.login');
+            return response()->json([
+                'message' => 'Login page',
+                'data' => null
+            ]);
         });
 
         Fortify::registerView(function(){
-            return view('auth.register', ['cities' => City::all()]);
+            $cities = City::all();
+            return response()->json([
+                'message' => 'Register page',
+                'cities' => $cities
+            ]);
+//return view('auth.register', ['cities' => City::all()]);
         });
+
     }
 }
